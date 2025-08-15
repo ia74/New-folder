@@ -30,7 +30,9 @@ class Renderable {
     this.vx *= smooth;
 
     for(const o of renderedObjects) {
-      if(this.x < o.x && this.x > o.x - tileSize) {
+      if(this.x < o.x && this.x > o.x - tileSize &&
+          this.y > o.y
+      ) {
         ctx.fillStyle = "blue"
       }
     }
@@ -72,10 +74,10 @@ const plyrControl = ()=> {
 
 const tileSize = 25;
 
-class Spike extends Renderable {
+class Spike extends MapTile {
   isSmall = false;
   constructor(x,y,isSmall) {
-    super(x,y,tileSize, tileSize)
+    super(x,y,"s")
     this.isSmall = isSmall;
   }
   draw() {
@@ -90,6 +92,14 @@ class Spike extends Renderable {
     ctx.lineTo(this.x - this.h, this.y+this.h)
     ctx.lineTo(this.x, this.y+this.h)
     ctx.fill();
+  }
+}
+
+class MapTile extends Renderable {
+  tile = "";
+  constructor(x,y,options="") {
+    super(x,y,(typeof options == "string" ? tileSize: options.w),(typeof options == "string" ? tileSize: options.h))
+    this.tile = (typeof options == "string" ? options : options.key);
   }
 }
 const renderedObjects = [];
@@ -109,7 +119,11 @@ const renderTilemap = (tm) => {
           startY = renderY;
           break;
         case "<":
-          renderedObjects.push(new Renderable(renderX,0,tileSize,floorY + tileSize))
+          renderedObjects.push(new MapTile(renderX,0,{
+            tile: "exit",
+            w: tileSize,
+            h: floorY + tileSize,
+          }))
           break;
         case ".":
           break;
